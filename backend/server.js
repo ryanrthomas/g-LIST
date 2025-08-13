@@ -1,22 +1,42 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import http from "http";
 import { authRouter, groupRouter, invitationRouter, itemRouter, userRouter } from "./routes/index.js";
 import Response from "./utils/Response.js";
 import { appLogger } from "./utils/logger.js";
+import { initializeSocket } from "./socket.js";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
+const server = http.createServer(app);
 
-// const corsOptions = {
-//     origin: process.env.FRONTEND_URL, // Replace with your frontend's origin
-//     credentials: true // Allow sending cookies/authentication headers
-// };
+initializeSocket(server);
 
-app.use(cors());
+const corsOptions = {
+    origin: [
+        process.env.FRONTEND_URL_DEV,
+        process.env.FRONTEND_URL,
+        'https://g-list.vercel.app',      // Hardcoded backup
+        'http://localhost:5173'           // Local dev backup
+    ],// Replace with your frontend's origin
+    credentials: true // Allow sending cookies/authentication headers
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Add health check endpoint for monitoring
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        port: port
+    });
+});
 
 app.use((req, res, next) => {
     appLogger.info('Incoming request', {
@@ -26,7 +46,7 @@ app.use((req, res, next) => {
         userAgent: req.get('User-Agent')
     });
     next();
-})
+});
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
@@ -35,14 +55,14 @@ app.use('/api/v1/items', itemRouter);
 app.use('/api/v1/invitations', invitationRouter);
 
 app.use((err, req, res, next) => {
-    appLogger.error('Unhandled error', { error: err.message, stack: err.stack })
-    const response = Response.internalServerError('Internal server error')
+    appLogger.error('Unhandled error', { error: err.message, stack: err.stack });
+    const response = Response.internalServerError('Internal server error');
     res.status(response.status).json(response.toJSON());
-})
+});
 
-app.listen(port, () => {
+server.listen(port, () => {
     appLogger.info("Server started", { port: port, env: process.env.NODE_ENV });
-    console.log("Server is listening on port 8080.");
+    console.log("Server is listening on port " + port + ".");
 });
 
 export default app;

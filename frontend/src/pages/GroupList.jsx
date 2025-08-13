@@ -22,39 +22,112 @@
       alert(err?.response?.data?.message || "Failed to delete account.");
     }
   };
-import { disconnectSocket } from "../services/socketClient";
+import { connectSocket, disconnectSocket } from "../services/socketClient";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "../css/grocery.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function GroceryList() {
+function GroupList() {
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newItem, setNewItem] = useState({ name: "", quantity: 1, price: "", status: "NEEDED" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [group, setGroup] = useState(null);
   const navigate = useNavigate();
+  const { groupId } = useParams();
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    const userId = localStorage.getItem("user_id");
+
+    if (!accessToken || !userId) return;
+
+    console.log('Connecting socket for group:', groupId);
+    const socket = connectSocket(accessToken);
+    
+    // Wait for connection before joining rooms
+    const setupSocket = () => {
+      console.log('Socket connected, joining rooms');
+      socket.emit('join-user', userId);
+      socket.emit('join-group', groupId);
+    };
+
+    // If already connected, setup immediately
+    if (socket.connected) {
+      setupSocket();
+    } else {
+      // Wait for connection
+      socket.on('connect', setupSocket);
+    }
+    
+    // Function to refetch the list (reuse the exact same logic as the original useEffect)
+    const refetchList = () => {
+      console.log('Real-time update: Refetching group list');
+      const accessToken = localStorage.getItem("access_token");
+      axios.get(`${API_BASE_URL}/groups/${groupId}/list`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+        .then(res => {
+          const data = res.data.data;
+          if (data && Array.isArray(data.Items)) {
+            setItems(data.Items.map(item => ({
+              id: item.id,
+              name: item.item_name,
+              quantity: item.item_quantity,
+              price: item.item_price ? Number(item.item_price) : 0,
+              status: item.item_status,
+              purchased: item.item_status === "PURCHASED"
+            })));
+          } else {
+            setItems([]);
+          }
+        })
+        .catch(() => {
+          console.log('Failed to refetch list after real-time update');
+        });
+    };
+    
+    // Listen for real-time events
+    socket.on('list:item_added', refetchList);
+    socket.on('list:item_updated', refetchList);
+    socket.on('list:item_deleted', refetchList);
+    socket.on('list:cleared', refetchList);
+    
+    return () => {
+      console.log('Cleaning up socket for group:', groupId);
+      socket.off('list:item_added');
+      socket.off('list:item_updated');
+      socket.off('list:item_deleted');
+      socket.off('list:cleared');
+      socket.emit('leave-group', groupId);
+      socket.emit('leave-user', userId);
+    };
+  }, [groupId]);
 
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
     if (!userId) {
-      navigate("/");
+      setError("No user ID found. Please log in.");
+      setLoading(false);
       return;
     }
     const accessToken = localStorage.getItem("access_token");
-    axios.get(`${API_BASE_URL}/users/${userId}/list`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
+    axios.get(`${API_BASE_URL}/groups/${groupId}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } })
+      .then(res => setGroup(res.data.data))
+      .catch(() => setGroup(null));
+    axios.get(`${API_BASE_URL}/groups/${groupId}/list`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
     })
       .then(res => {
         const data = res.data.data;
         if (data && Array.isArray(data.Items)) {
           setItems(data.Items.map(item => ({
-            id: item.id, // store backend id
+            id: item.id,
             name: item.item_name,
             quantity: item.item_quantity,
             price: item.item_price ? Number(item.item_price) : 0,
@@ -66,11 +139,11 @@ function GroceryList() {
         }
         setLoading(false);
       })
-      .catch(err => {
-        setError("Failed to fetch list.");
+      .catch(() => {
+        setError("Failed to fetch group list.");
         setLoading(false);
       });
-  }, [navigate]);
+  }, [groupId]);
 
   const expectedTotal = items.reduce((total, item) => {
     if (item.status === "NEEDED" || item.status === "OPTIONAL") {
@@ -84,22 +157,16 @@ function GroceryList() {
       alert("Error: Item ID is undefined. Cannot update status.");
       return;
     }
-    const userId = localStorage.getItem("user_id");
     const accessToken = localStorage.getItem("access_token");
     const idx = items.findIndex(it => it.id === itemId);
     if (idx === -1) return;
     const item = items[idx];
-  // If currently purchased, unchecking should set to NEEDED; if not, set to PURCHASED
-  const newStatus = item.purchased ? "NEEDED" : "PURCHASED";
+    const newStatus = item.purchased ? "NEEDED" : "PURCHASED";
     try {
       await axios.put(
         `${API_BASE_URL}/items/${item.id}/status`,
         { item_status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       setItems(items => items.map((it, i) =>
         i === idx ? { ...it, purchased: !it.purchased, status: newStatus } : it
@@ -111,17 +178,12 @@ function GroceryList() {
 
   const handleClear = async () => {
     if (window.confirm("Are you sure you want to clear the entire list?")) {
-      const userId = localStorage.getItem("user_id");
       const accessToken = localStorage.getItem("access_token");
       try {
         await axios.put(
-          `${API_BASE_URL}/users/${userId}/list/clear`,
+          `${API_BASE_URL}/groups/${groupId}/list/clear`,
           {},
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
-          }
+          { headers: { Authorization: `Bearer ${accessToken}` } }
         );
         setItems([]);
       } catch (err) {
@@ -145,29 +207,22 @@ function GroceryList() {
       alert("Please fill out valid Name, Quantity, and Price.");
       return;
     }
-    const userId = localStorage.getItem("user_id");
     const accessToken = localStorage.getItem("access_token");
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/users/${userId}/list/items`,
+      await axios.post(
+        `${API_BASE_URL}/groups/${groupId}/list/items`,
         {
           item_name: newItem.name,
           item_quantity: newItem.quantity,
           item_price: newItem.price,
           item_status: newItem.status
         },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       // Optionally, fetch the updated list from backend
       setLoading(true);
-      axios.get(`${API_BASE_URL}/users/${userId}/list`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
+      axios.get(`${API_BASE_URL}/groups/${groupId}/list`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
       })
         .then(res => {
           const data = res.data.data;
@@ -185,8 +240,8 @@ function GroceryList() {
           }
           setLoading(false);
         })
-        .catch(err => {
-          setError("Failed to fetch list.");
+        .catch(() => {
+          setError("Failed to fetch group list.");
           setLoading(false);
         });
       setShowModal(false);
@@ -200,7 +255,6 @@ function GroceryList() {
 
   return (
     <>
-
       <nav className="top-nav">
         <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
           <a href="#" style={{ marginRight: 16, color: 'red', fontWeight: 600 }} onClick={e => { e.preventDefault(); handleDeleteAccount(); }}>Delete Account</a>
@@ -217,11 +271,10 @@ function GroceryList() {
           }}>Sign Out</a>
         </div>
       </nav>
-
-  <main className="list-container">
-        <h1>My Grocery List</h1>
+      <main className="list-container">
+        <h1>{group ? group.group_name : "Group List"}</h1>
         {items.length === 0 ? (
-          <p style={{ textAlign: "center", margin: "32px 0" }}>No items in your list yet.</p>
+          <p style={{ textAlign: "center", margin: "32px 0" }}>No items in this group list yet.</p>
         ) : (
           <table className="item-table">
             <thead>
@@ -251,12 +304,10 @@ function GroceryList() {
           <button className="btn clear" onClick={handleClear}>Clear List</button>
         </div>
       </main>
-
       <section className="totals-container">
         <h2>Expected Total</h2>
         <p id="expectedTotal">${expectedTotal.toFixed(2)}</p>
       </section>
-
       {showModal && (
         <div className="modal" style={{ display: "block" }}>
           <div className="modal-content">
@@ -279,5 +330,4 @@ function GroceryList() {
   );
 }
 
-export default GroceryList;
-
+export default GroupList;

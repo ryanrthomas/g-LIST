@@ -1,7 +1,7 @@
 import request from 'supertest';
 import prisma from '../config/prisma.js';
 
-const app = `http://localhost:${process.env.PORT}`;
+const app = process.env.BACKEND_URL_DEV;
 // Test data
 const testUser = {
     email: `usertest1-${Date.now()}@example.com`, // Unique email for each test run

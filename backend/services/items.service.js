@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import { itemLogger } from "../utils/logger.js";
+import { eventEmitter } from "../utils/events.js";
 
 const itemService = {
     getItem: async (itemID) => {
@@ -47,7 +48,7 @@ const itemService = {
         }
     },
 
-    updateDetails: async (itemID, itemData) => {
+    updateDetails: async (itemID, itemData, userID, groupID = null) => {
         if (!itemID) {
             itemLogger.warn("updateDetails called without itemID");
             const err = new Error("Item ID is required");
@@ -57,7 +58,7 @@ const itemService = {
 
         const { item_name, item_price, item_quantity, item_status } = itemData;
 
-        if (!item_name && !item_quantity && !item_price && !item_status) {
+        if (item_name === undefined && item_quantity === undefined && item_price === undefined && item_status === undefined){
             itemLogger.warn("updateDetails called without any updatable fields");
             const err = new Error("At least one field (item_name, item_price, item_quantity, item_status) is required");
             err.status = 400;
@@ -65,6 +66,12 @@ const itemService = {
         }
 
         try {
+            let previousData = null;
+            
+            if (groupID) {
+                previousData = await this.getItem(itemID);
+            }
+
             const result = await prisma.$transaction(async (trxn) => {
                 const existingItem = await trxn.items.findUnique({
                     where: {
@@ -88,10 +95,10 @@ const itemService = {
                         id: itemID
                     },
                     data: {
-                        ...(item_name && { item_name }),
+                        ...(item_name !== undefined && { item_name }),
                         ...(item_quantity !== undefined && { item_quantity }),
                         ...(item_price !== undefined && { item_price }),
-                        ...(item_status && { item_status })  
+                        ...(item_status !== undefined && { item_status })
                     },
                     select: {
                         id: true,
@@ -150,11 +157,31 @@ const itemService = {
                 };
             });
 
-            itemLogger.info(`Item updated successfully: ${itemID}`);
-            return {
+            const finalResult = {
                 ...result.updatedItem,
                 updated_totals: result.updated_totals
+            };
+
+            if (groupID && userID) {
+                const user = await prisma.users.findUnique({
+                    where: { id: userID },
+                    select: { first_name: true, last_name: true }
+                });
+                
+                eventEmitter.emit('list_item_updated', {
+                    groupId: groupID,
+                    item: finalResult,
+                    previousData,
+                    user: {
+                        id: userID,
+                        first_name: user?.first_name || 'Unknown',
+                        last_name: user?.last_name || 'User'
+                    }
+                });
             }
+
+            itemLogger.info(`Item updated successfully: ${itemID}`);
+            return finalResult;
         }
         catch (error) {
             if (error.status) {
@@ -165,7 +192,8 @@ const itemService = {
         }
     },
 
-    updateStatus: async (itemID, itemStatus) => {
+    updateStatus: async (itemID, itemStatus, userID, groupID = null) => {
+        console.log("UPDATE-STATUS: Parameters", { itemID, userID, groupID: !!groupID });
         if (!itemID) {
             itemLogger.warn("updateStatus called without itemID");
             const err = new Error("Item ID is required");
@@ -175,7 +203,8 @@ const itemService = {
 
         const { item_status } = itemStatus;
 
-        if (!item_status) {
+        const validStatuses = ['NEEDED', 'PURCHASED', 'OPTIONAL'];
+        if (!item_status || !validStatuses.includes(item_status)) {
             itemLogger.warn("updateStatus called without item_status");
             const err = new Error("item_status is required");
             err.status = 400;
@@ -183,6 +212,11 @@ const itemService = {
         }
 
         try {
+            let previousData = null;
+            if (groupID) {
+                previousData = await itemService.getItem(itemID);
+            }
+
             const result = await prisma.$transaction(async (trxn) => {
                 const existingItem = await trxn.items.findUnique({
                     where: {
@@ -252,8 +286,13 @@ const itemService = {
                 actual_total = Math.round(actual_total * 100) / 100;
 
                 await trxn.lists.update({
-                    where: { id: existingItem.list_id },
-                    data: { expected_total, actual_total }
+                    where: { 
+                        id: existingItem.list_id 
+                    },
+                    data: { 
+                        expected_total, 
+                        actual_total 
+                    }
                 });
 
                 return {
@@ -265,22 +304,53 @@ const itemService = {
                 };
             });
 
-            itemLogger.info(`Item updated successfully: ${itemID}`);
-            return  {
+            const finalResult = {
                 ...result.updatedItem,
                 updated_totals: result.updated_totals
+            };
+
+            if (groupID && userID) {
+                try {
+
+                    const user = await prisma.users.findUnique({
+                        where: { id: userID },
+                        select: { first_name: true, last_name: true }
+                    });
+
+                    
+                    eventEmitter.emit('list_item_updated', {
+                        groupId: groupID,
+                        item: finalResult,
+                        previousData,
+                        user: {
+                            id: userID,
+                            first_name: user?.first_name || 'Unknown',
+                            last_name: user?.last_name || 'User'
+                        }
+                    });
+
+                }
+                catch (err){
+
+                    throw err;
+                }
             }
+
+            console.log("UPDATE-STATUS: About to return final result");
+            itemLogger.info(`Item updated successfully: ${itemID}`);
+            return finalResult; 
         }
         catch (error) {
             if (error.status) {
                 throw error; // Re-throw known errors
             }
             itemLogger.error(`Database error in updateStatus: ${error.message}`);
-            throw new Error("Failed to update item status");            
+            //throw new Error("Failed to update item status");            
+             throw error;
         }
     },
 
-    deleteItem: async (itemID) => {
+    deleteItem: async (itemID, userID, groupID = null) => {
         if (!itemID) {
             itemLogger.warn("deleteItem called without itemID");
             const err = new Error("Item ID is required");
@@ -366,9 +436,9 @@ const itemService = {
                 };
             });
             
-            itemLogger.info(`Deleted item ${itemID} "${deletedItem.itemDetails.item_name}" from list ${deletedItem.itemDetails.list_id}`);
+            
         
-            return {
+            const finalResult = {
                 deleted_item: {
                     id: deletedItem.deletedItem.id,
                     item_name: deletedItem.itemDetails.item_name,
@@ -382,6 +452,26 @@ const itemService = {
                     user_code: deletedItem.itemDetails.Users.user_code
                 }
             }
+
+            if (groupID && userID) {
+                const user = await prisma.users.findUnique({
+                    where: { id: userID },
+                    select: { first_name: true, last_name: true }
+                });
+                
+                eventEmitter.emit('list_item_deleted', {
+                    groupId: groupID,
+                    deletedItem: finalResult.deleted_item,
+                    user: {
+                        id: userID,
+                        first_name: user?.first_name || 'Unknown',
+                        last_name: user?.last_name || 'User'
+                    }
+                });
+            }
+
+            itemLogger.info(`Deleted item ${itemID} "${deletedItem.itemDetails.item_name}" from list ${deletedItem.itemDetails.list_id}`);
+            return finalResult;
         }
         catch (error) {
             if (error.status) {

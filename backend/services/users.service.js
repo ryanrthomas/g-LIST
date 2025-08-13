@@ -177,7 +177,8 @@ const userService = {
         try {
             const receivedInvitations = await prisma.invitations.findMany({
                 where: {
-                    to_user_id: userID
+                    to_user_id: userID,
+                    status: "PENDING"
                 },
                 select: {
                     id: true,
@@ -229,7 +230,8 @@ const userService = {
         try {
             const sentInvitations = await prisma.invitations.findMany({
                 where: {
-                    from_user_id: userID
+                    from_user_id: userID,
+                    status: "PENDING"
                 },
                 select: {
                     id: true,
@@ -311,6 +313,50 @@ const userService = {
                         item_status: item_status || "NEEDED"
                     }
                 });
+                const allItems = await trxn.items.findMany({
+                    where: { 
+                        list_id: userList.list_id 
+                    },
+                    select: {
+                        item_price: true,
+                        item_quantity: true,
+                        item_status: true
+                    }
+                });
+
+                let expected_total = 0;
+                let actual_total = 0;
+
+                allItems.forEach(listItem => {
+                    const price = parseFloat(listItem.item_price) || 0;
+                    const quantity = parseInt(listItem.item_quantity) || 0;
+                    const itemTotal = price * quantity; 
+
+                    if (["NEEDED", "OPTIONAL"].includes(listItem.item_status)) {
+                        expected_total += itemTotal;
+                    }
+                    if (listItem.item_status === "PURCHASED") {
+                        actual_total += itemTotal;
+                    }
+                });
+
+                expected_total = Math.round(expected_total * 100) / 100;
+                actual_total = Math.round(actual_total * 100) / 100;
+
+                await trxn.lists.update({
+                    where: { 
+                        id: userList.list_id 
+                    },
+                    data: { 
+                        expected_total, 
+                        actual_total 
+                    }
+                });
+
+                item.updated_totals = {
+                    expected_total,
+                    actual_total
+                };
 
                 return item;
             });
@@ -472,6 +518,13 @@ const userService = {
         }
 
         try {
+            const { error: signOutError } = await supabaseAdmin.auth.admin.signOut(userID, 'global');
+            if (signOutError) {
+                userLogger.warn(`Failed to sign out user ${userID} before deletion: ${signOutError.message}`);
+                // Continue with deletion even if signout fails
+            } else {
+                userLogger.info(`Successfully signed out user ${userID} before deletion`);
+            }
             await prisma.$transaction(async (trxn) => {
                 const userGroups = await trxn.groupMembers.findMany({
                     where: { 
@@ -498,20 +551,35 @@ const userService = {
 
                 if (userList) {
                     await trxn.lists.delete({
-                        where: { id: userList.list_id }
+                        where: { 
+                            id: userList.list_id 
+                        }
                     });
                 }
+
+                await trxn.groupMembers.deleteMany({
+                    where: {
+                        user_id: userID
+                    }
+                });
                 
                 const groupsToDelete = userGroups.filter(membership => 
                     membership.Groups._count.GroupMembers <= 2 
                 );
                 
                 for (const membership of groupsToDelete) {
-                    await trxn.groups.delete({ 
-                        where: { 
-                            id: membership.group_id 
-                        } 
-                    });
+                    try {
+                        await trxn.groups.delete({ 
+                            where: { 
+                                id: membership.group_id 
+                            } 
+                        });
+
+                        userLogger.info(`Deleted group ${membership.group_id} as it became empty/single-member`);
+                    }
+                    catch (groupDeleteError) {
+                        userLogger.warn(`Failed to delete group ${membership.group_id}: ${groupDeleteError.message}`);
+                    }
                 }
                 
                 await trxn.users.delete({ 
@@ -528,12 +596,19 @@ const userService = {
             else {
                 userLogger.info(`Successfully deleted Supabase auth user: ${userID}`);
             }
+            userLogger.info(`User ${userID} completely deleted successfully`);
         }
         catch (error) {
             if (error.status) {
                 throw error;
             }
-            userLogger.error(`Database error in deleteUser: ${error.message}`);
+            
+            userLogger.error(`Error in deleteUser for ${userID}: ${error.message}`, {
+                error: error,
+                stack: error.stack,
+                userID: userID
+            });
+
             throw new Error("Failed to delete user");
         }
     }
