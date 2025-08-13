@@ -16,7 +16,6 @@
   --pale-green: #D1F5BE;
   --button-hover: #6b5d45;
   --font-main: 'Segoe UI', Arial, sans-serif;
-}
   background: var(--pale-green);
   font-family: var(--font-main);
   color: var(--deep-plum);
