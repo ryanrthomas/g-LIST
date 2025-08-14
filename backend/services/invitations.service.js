@@ -272,6 +272,9 @@ const invitationService = {
     },
 
     startGroup: async (fromUserID, groupData) => {
+            console.log('=== INVITATION SERVICE START GROUP ===');
+            console.log('fromUserID:', fromUserID);
+            console.log('groupData:', groupData);
         if (!fromUserID) {
             invitationLogger.warn("startGroup called without fromUserID");
             const err = new Error("From User ID is required");
