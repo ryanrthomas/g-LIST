@@ -15,13 +15,25 @@ const server = http.createServer(app);
 
 initializeSocket(server);
 
-// const corsOptions = {
-//     origin: process.env.FRONTEND_URL, // Replace with your frontend's origin
-//     credentials: true // Allow sending cookies/authentication headers
-// };
+const corsOptions = {
+    origin: [
+        process.env.FRONTEND_URL_DEV,
+        process.env.FRONTEND_URL ],// Replace with your frontend's origin
+    credentials: true // Allow sending cookies/authentication headers
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Add health check endpoint for monitoring
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        port: port
+    });
+});
 
 app.use((req, res, next) => {
     appLogger.info('Incoming request', {
