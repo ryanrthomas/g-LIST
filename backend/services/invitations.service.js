@@ -1,3 +1,4 @@
+import prisma from "../config/prisma.js"
 import { invitationLogger } from "../utils/logger.js";
 import { eventEmitter } from "../utils/events.js";
 import { generateCode } from "../utils/codeGenerator.js";
