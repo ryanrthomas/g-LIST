@@ -43,12 +43,26 @@ const invitationController = {
     },
 
     startGroup: async (req, res) => {
+        console.error('=== START GROUP ERROR ===');
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Error status:', error.status);
+        console.error('Request user:', req.user);
+        console.error('Request body:', req.body);
+        console.error('=== END START GROUP ERROR ===');
         try {
             const sentStartGroupRequest = await invitationService.startGroup(req.user.id, req.body);
             const response = Response.ok(sentStartGroupRequest, "Request to join group sent successfully");
             return res.status(response.status).json(response.toJSON());
         }
         catch (error) {
+            console.error('=== START GROUP ERROR ===');
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            console.error('Error status:', error.status);
+            console.error('Request user:', req.user);
+            console.error('Request body:', req.body);
+            console.error('=== END START GROUP ERROR ===');
             const status = error.status || 500;
             const response = new Response({ status }, error.message);
             return res.status(response.status).json(response.toJSON());
