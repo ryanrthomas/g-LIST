@@ -438,6 +438,12 @@ const invitationService = {
                             list_id: groupList.id,
                         }
                     });
+
+                    await trxn.invitations.delete({
+                        where: { 
+                            id: invitationID 
+                        }
+                    });
                 }
                 else if (invitation.type === "JOIN_REQUEST" || invitation.type === "GROUP_INVITE") {
                     if (!invitation.group_id) {
@@ -507,25 +513,23 @@ const invitationService = {
                     status: 'ACCEPTED' // For event emission purposes
                 };
 
-                eventEmitter.emit('invitation_status_updated', {
-                    invitation: result.invitationData,
-                    status: 'ACCEPTED',
-                    recipientData: result.invitationData.ToUser
-                });
-
                 return {
-                    invitation: updatedInvitation,
                     group: newGroup,
                     newMembers: newMembers,
-                    invitationData: invitation
+                    invitationData: invitationData
                 }
             });
 
+            eventEmitter.emit('invitation_status_updated', {
+                invitation: result.invitationData,
+                status: 'ACCEPTED',
+                recipientData: result.invitationData.ToUser
+            });
             invitationLogger.info(`User ${userID} accepted invitation ${invitationID} of type ${result.invitationData.type}`);
+            
             return {
-                invitation: result.invitation,
                 group: result.group,
-                group_name: result.group_name,
+                group_name: result.group.group_name,
                 type: result.invitation.type
             }
         
