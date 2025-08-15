@@ -313,17 +313,17 @@ const groupService = {
 
             eventEmitter.emit('list_item_added', {
                 groupID,
-                item: newItem,
+                item: newItem.item,
                 user: {
                     id: userID,
-                    first_name: newItem.added_by.first_name,
-                    last_name: newItem.added_by.last_name
+                    first_name: newItem.item.added_by.first_name,
+                    last_name: newItem.item.added_by.last_name
                 }
             });
 
             groupLogger.info(`Added new item to group list for group ${groupID}`);
             return { 
-                newItem,
+                newItem: newItem.item,
                 updated_totals: newItem.updated_totals
             }; 
         }
