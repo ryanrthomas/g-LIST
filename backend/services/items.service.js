@@ -169,7 +169,7 @@ const itemService = {
                 });
                 
                 eventEmitter.emit('list_item_updated', {
-                    groupID,
+                    groupId: groupID,
                     item: finalResult,
                     previousData,
                     user: {
@@ -214,17 +214,7 @@ const itemService = {
         try {
             let previousData = null;
             if (groupID) {
-                console.log("UPDATE-STATUS: This is a GROUP item, getting previous data");
-                console.log("UPDATE-STATUS: groupID value:", groupID);
-                try {
                 previousData = await itemService.getItem(itemID);
-                console.log("UPDATE-STATUS: Previous data retrieved successfully");
-                } catch (err) {
-                    console.log("UPDATE-STATUS: Failed to get previous data:", err.message);
-                    throw err;
-                }
-            }else {
-            console.log("UPDATE-STATUS: This is a PERSONAL item");
             }
 
             const result = await prisma.$transaction(async (trxn) => {
@@ -305,7 +295,6 @@ const itemService = {
                     }
                 });
 
-                console.log("UPDATE-STATUS: Transaction completed successfully");
                 return {
                     updatedItem,
                     updated_totals: { 
@@ -321,31 +310,30 @@ const itemService = {
             };
 
             if (groupID && userID) {
-                try{
-                console.log("UPDATE-STATUS: About to handle group-specific logic");
-                const user = await prisma.users.findUnique({
-                    where: { id: userID },
-                    select: { first_name: true, last_name: true }
-                });
-                console.log("UPDATE-STATUS: User data retrieved:", !!user);
-                
-                console.log("UPDATE-STATUS: About to emit group event");
-                eventEmitter.emit('list_item_updated', {
-                    groupID,
-                    item: finalResult,
-                    previousData,
-                    user: {
-                        id: userID,
-                        first_name: user?.first_name || 'Unknown',
-                        last_name: user?.last_name || 'User'
-                    }
-                });
-                console.log("UPDATE-STATUS: Group event emitted successfully");
-            }
-            catch (err){
-                console.log("UPDATE-STATUS: Group logic failed:", err.message);
-                throw err;
-            }
+                try {
+
+                    const user = await prisma.users.findUnique({
+                        where: { id: userID },
+                        select: { first_name: true, last_name: true }
+                    });
+
+                    
+                    eventEmitter.emit('list_item_updated', {
+                        groupId: groupID,
+                        item: finalResult,
+                        previousData,
+                        user: {
+                            id: userID,
+                            first_name: user?.first_name || 'Unknown',
+                            last_name: user?.last_name || 'User'
+                        }
+                    });
+
+                }
+                catch (err){
+
+                    throw err;
+                }
             }
 
             console.log("UPDATE-STATUS: About to return final result");
@@ -358,7 +346,6 @@ const itemService = {
             }
             itemLogger.error(`Database error in updateStatus: ${error.message}`);
             //throw new Error("Failed to update item status");            
-             console.log("UPDATE-STATUS: Caught error:", error.message);
              throw error;
         }
     },
@@ -473,7 +460,7 @@ const itemService = {
                 });
                 
                 eventEmitter.emit('list_item_deleted', {
-                    groupID,
+                    groupId: groupID,
                     deletedItem: finalResult.deleted_item,
                     user: {
                         id: userID,
