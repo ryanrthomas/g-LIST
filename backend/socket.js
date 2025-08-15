@@ -7,7 +7,13 @@ let io;
 export const initializeSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.FRONTEND_URL || process.env.FRONTEND_URL_DEV,
+            origin: [
+            process.env.FRONTEND_URL,
+            process.env.FRONTEND_URL_DEV,
+            "https://g-list.vercel.app",  // Add your Vercel domain here
+            "http://localhost:3000",      // For local development
+            "http://localhost:5173"       // For Vite dev server
+        ],
             methods: ["GET", "POST"],
             credentials: true
         }
