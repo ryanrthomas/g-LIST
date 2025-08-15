@@ -86,9 +86,15 @@ const invitationController = {
             console.log("Error status:", error.status);
             console.log("Error stack:", error.stack);
             console.log("=== END ERROR ===");
-            const status = error.status || 500;
-            const response = new Response({ status }, error.message);
-            return res.status(response.status).json(response.toJSON());
+
+            if (error.status) {
+                throw error; // Re-throw known errors
+            }
+            // const status = error.status || 500;
+            // const response = new Response({ status }, error.message);
+            // return res.status(response.status).json(response.toJSON());
+
+            throw error;
         }
     },
 
