@@ -23,7 +23,7 @@
     }
   };
 import axios from "axios";
-import { getSocket, disconnectSocket } from "../services/socketClient";
+import { getSocket, connectSocket, disconnectSocket } from "../services/socketClient";
 import "./Groups.css";
 
 function Groups() {
@@ -104,11 +104,17 @@ function Groups() {
 
   // Real-time event listeners
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
-
+    const accessToken = localStorage.getItem("access_token");
     const userId = localStorage.getItem("user_id");
     if (!userId) return;
+
+    if (!accessToken || !userId) return;
+
+    // Connect the socket with authentication
+    const socket = connectSocket(accessToken); 
+    // Join user room for real-time updates
+    socket.emit('join-user', userId);
+
     // Group events: refresh groups on any group change
     const refreshGroups = () => fetchGroups();
     socket.on("group_item_added", refreshGroups);

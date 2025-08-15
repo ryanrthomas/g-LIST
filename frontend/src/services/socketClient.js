@@ -9,7 +9,7 @@ export function connectSocket(token) {
   if (!socket) {
     socket = io(SOCKET_URL, {
       auth: { token },
-      autoConnect: false,
+      autoConnect: true,
       transports: ["websocket", "polling"],
     });
   }

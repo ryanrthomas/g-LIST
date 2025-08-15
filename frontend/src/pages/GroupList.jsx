@@ -42,13 +42,27 @@ function GroupList() {
 
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) return;
+    const userId = localStorage.getItem("user_id");
+
+    if (!accessToken || !userId) return;
 
     console.log('Connecting socket for group:', groupId);
     const socket = connectSocket(accessToken);
     
-    // Join group room
-    socket.emit('join-group', groupId);
+    // Wait for connection before joining rooms
+    const setupSocket = () => {
+      console.log('Socket connected, joining rooms');
+      socket.emit('join-user', userId);
+      socket.emit('join-group', groupId);
+    };
+
+    // If already connected, setup immediately
+    if (socket.connected) {
+      setupSocket();
+    } else {
+      // Wait for connection
+      socket.on('connect', setupSocket);
+    }
     
     // Function to refetch the list (reuse the exact same logic as the original useEffect)
     const refetchList = () => {
@@ -90,6 +104,7 @@ function GroupList() {
       socket.off('list_item_deleted');
       socket.off('list_cleared');
       socket.emit('leave-group', groupId);
+      socket.emit('leave-user', userId);
     };
   }, [groupId]);
 
