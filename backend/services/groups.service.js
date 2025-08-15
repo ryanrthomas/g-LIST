@@ -312,7 +312,7 @@ const groupService = {
             });
 
             eventEmitter.emit('list_item_added', {
-                groupID,
+                groupId: groupID,
                 item: newItem.item,
                 user: {
                     id: userID,
@@ -460,7 +460,7 @@ const groupService = {
             });
             
             eventEmitter.emit('list_cleared', {
-                groupID,
+                groupId: groupID,
                 user: {
                     id: userID,
                     first_name: user?.first_name || 'Unknown',
