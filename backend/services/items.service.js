@@ -58,7 +58,7 @@ const itemService = {
 
         const { item_name, item_price, item_quantity, item_status } = itemData;
 
-        if (!item_name && !item_quantity && !item_price && !item_status) {
+        if (item_name === undefined && item_quantity === undefined && item_price === undefined && item_status === undefined){
             itemLogger.warn("updateDetails called without any updatable fields");
             const err = new Error("At least one field (item_name, item_price, item_quantity, item_status) is required");
             err.status = 400;
@@ -95,10 +95,10 @@ const itemService = {
                         id: itemID
                     },
                     data: {
-                        ...(item_name && { item_name }),
+                        ...(item_name !== undefined && { item_name }),
                         ...(item_quantity !== undefined && { item_quantity }),
                         ...(item_price !== undefined && { item_price }),
-                        ...(item_status && { item_status })  
+                        ...(item_status !== undefined && { item_status })
                     },
                     select: {
                         id: true,
@@ -202,7 +202,8 @@ const itemService = {
 
         const { item_status } = itemStatus;
 
-        if (!item_status) {
+        const validStatuses = ['NEEDED', 'PURCHASED', 'OPTIONAL'];
+        if (!item_status || !validStatuses.includes(item_status)) {
             itemLogger.warn("updateStatus called without item_status");
             const err = new Error("item_status is required");
             err.status = 400;
