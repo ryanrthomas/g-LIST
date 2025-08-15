@@ -107,6 +107,8 @@ function Groups() {
     const socket = getSocket();
     if (!socket) return;
 
+    const userId = localStorage.getItem("user_id");
+    if (!userId) return;
     // Group events: refresh groups on any group change
     const refreshGroups = () => fetchGroups();
     socket.on("group_item_added", refreshGroups);
