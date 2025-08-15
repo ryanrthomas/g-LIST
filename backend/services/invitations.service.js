@@ -539,7 +539,8 @@ const invitationService = {
                 throw error; // Re-throw known errors
             }
             invitationLogger.error(`Database error in acceptInvite: ${error.message}`);
-            throw new Error("Failed to accept invitation");
+            //throw new Error("Failed to accept invitation");
+            throw error;
         }
     },
 
