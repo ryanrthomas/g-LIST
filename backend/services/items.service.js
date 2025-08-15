@@ -193,6 +193,7 @@ const itemService = {
     },
 
     updateStatus: async (itemID, itemStatus, userID, groupID = null) => {
+        console.log("UPDATE-STATUS: Parameters", { itemID, userID, groupID: !!groupID });
         if (!itemID) {
             itemLogger.warn("updateStatus called without itemID");
             const err = new Error("Item ID is required");
@@ -213,7 +214,17 @@ const itemService = {
         try {
             let previousData = null;
             if (groupID) {
+                console.log("UPDATE-STATUS: This is a GROUP item, getting previous data");
+                console.log("UPDATE-STATUS: groupID value:", groupID);
+                try {
                 previousData = await this.getItem(itemID);
+                console.log("UPDATE-STATUS: Previous data retrieved successfully");
+                } catch (err) {
+                    console.log("UPDATE-STATUS: Failed to get previous data:", err.message);
+                    throw err;
+                }
+            }else {
+            console.log("UPDATE-STATUS: This is a PERSONAL item");
             }
 
             const result = await prisma.$transaction(async (trxn) => {
@@ -294,6 +305,7 @@ const itemService = {
                     }
                 });
 
+                console.log("UPDATE-STATUS: Transaction completed successfully");
                 return {
                     updatedItem,
                     updated_totals: { 
@@ -309,11 +321,15 @@ const itemService = {
             };
 
             if (groupID && userID) {
+                try{
+                console.log("UPDATE-STATUS: About to handle group-specific logic");
                 const user = await prisma.users.findUnique({
                     where: { id: userID },
                     select: { first_name: true, last_name: true }
                 });
+                console.log("UPDATE-STATUS: User data retrieved:", !!user);
                 
+                console.log("UPDATE-STATUS: About to emit group event");
                 eventEmitter.emit('list_item_updated', {
                     groupID,
                     item: finalResult,
@@ -324,8 +340,15 @@ const itemService = {
                         last_name: user?.last_name || 'User'
                     }
                 });
+                console.log("UPDATE-STATUS: Group event emitted successfully");
+            }
+            catch (err){
+                console.log("UPDATE-STATUS: Group logic failed:", err.message);
+                throw err;
+            }
             }
 
+            console.log("UPDATE-STATUS: About to return final result");
             itemLogger.info(`Item updated successfully: ${itemID}`);
             return finalResult; 
         }
@@ -334,7 +357,9 @@ const itemService = {
                 throw error; // Re-throw known errors
             }
             itemLogger.error(`Database error in updateStatus: ${error.message}`);
-            throw new Error("Failed to update item status");            
+            //throw new Error("Failed to update item status");            
+             console.log("UPDATE-STATUS: Caught error:", error.message);
+             throw error;
         }
     },
 
