@@ -217,7 +217,7 @@ const itemService = {
                 console.log("UPDATE-STATUS: This is a GROUP item, getting previous data");
                 console.log("UPDATE-STATUS: groupID value:", groupID);
                 try {
-                previousData = await this.getItem(itemID);
+                previousData = await itemService.getItem(itemID);
                 console.log("UPDATE-STATUS: Previous data retrieved successfully");
                 } catch (err) {
                     console.log("UPDATE-STATUS: Failed to get previous data:", err.message);
