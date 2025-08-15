@@ -273,9 +273,6 @@ const invitationService = {
     },
 
     startGroup: async (fromUserID, groupData) => {
-            console.log('=== INVITATION SERVICE START GROUP ===');
-            console.log('fromUserID:', fromUserID);
-            console.log('groupData:', groupData);
         if (!fromUserID) {
             invitationLogger.warn("startGroup called without fromUserID");
             const err = new Error("From User ID is required");
@@ -299,7 +296,7 @@ const invitationService = {
                         user_code: to_user_code
                     }
                 });
-
+        
                 if (!toUser) {
                     const err = new Error("User with that code not found");
                     err.status = 404;
@@ -316,7 +313,7 @@ const invitationService = {
                 const newGroup = await trxn.groups.create({
                     data: {
                         group_name: group_name,
-                        group_code: generateCode(),
+                        group_code: generateCode("group"),
                     }
                 });
 
