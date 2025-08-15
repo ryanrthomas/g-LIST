@@ -92,17 +92,17 @@ function GroupList() {
     };
     
     // Listen for real-time events
-    socket.on('list_item_added', refetchList);
-    socket.on('list_item_updated', refetchList);
-    socket.on('list_item_deleted', refetchList);
-    socket.on('list_cleared', refetchList);
+    socket.on('list:item_added', refetchList);
+    socket.on('list:item_updated', refetchList);
+    socket.on('list:item_deleted', refetchList);
+    socket.on('list:cleared', refetchList);
     
     return () => {
       console.log('Cleaning up socket for group:', groupId);
-      socket.off('list_item_added');
-      socket.off('list_item_updated');
-      socket.off('list_item_deleted');
-      socket.off('list_cleared');
+      socket.off('list:item_added');
+      socket.off('list:item_updated');
+      socket.off('list:item_deleted');
+      socket.off('list:cleared');
       socket.emit('leave-group', groupId);
       socket.emit('leave-user', userId);
     };
