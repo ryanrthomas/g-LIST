@@ -551,20 +551,35 @@ const userService = {
 
                 if (userList) {
                     await trxn.lists.delete({
-                        where: { id: userList.list_id }
+                        where: { 
+                            id: userList.list_id 
+                        }
                     });
                 }
+
+                await trxn.groupMembers.deleteMany({
+                    where: {
+                        user_id: userID
+                    }
+                });
                 
                 const groupsToDelete = userGroups.filter(membership => 
                     membership.Groups._count.GroupMembers <= 2 
                 );
                 
                 for (const membership of groupsToDelete) {
-                    await trxn.groups.delete({ 
-                        where: { 
-                            id: membership.group_id 
-                        } 
-                    });
+                    try {
+                        await trxn.groups.delete({ 
+                            where: { 
+                                id: membership.group_id 
+                            } 
+                        });
+
+                        userLogger.info(`Deleted group ${membership.group_id} as it became empty/single-member`);
+                    }
+                    catch (groupDeleteError) {
+                        userLogger.warn(`Failed to delete group ${membership.group_id}: ${groupDeleteError.message}`);
+                    }
                 }
                 
                 await trxn.users.delete({ 
@@ -581,12 +596,19 @@ const userService = {
             else {
                 userLogger.info(`Successfully deleted Supabase auth user: ${userID}`);
             }
+            userLogger.info(`User ${userID} completely deleted successfully`);
         }
         catch (error) {
             if (error.status) {
                 throw error;
             }
-            userLogger.error(`Database error in deleteUser: ${error.message}`);
+            
+            userLogger.error(`Error in deleteUser for ${userID}: ${error.message}`, {
+                error: error,
+                stack: error.stack,
+                userID: userID
+            });
+
             throw new Error("Failed to delete user");
         }
     }

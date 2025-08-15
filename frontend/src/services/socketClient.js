@@ -10,7 +10,14 @@ export function connectSocket(token) {
     socket = io(SOCKET_URL, {
       auth: { token },
       autoConnect: false,
-      transports: ["websocket"],
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
     });
   }
   if (!socket.connected) {
