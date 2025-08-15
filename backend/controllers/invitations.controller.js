@@ -80,16 +80,18 @@ const invitationController = {
             console.log("Response sent successfully");
         }
         catch (error) {
-            console.log("=== ACCEPT INVITE ERROR ===");
-            console.log("Error type:", error.constructor.name);
-            console.log("Error message:", error.message);
-            console.log("Error status:", error.status);
-            console.log("Error stack:", error.stack);
-            console.log("=== END ERROR ===");
+            console.log("=== ORIGINAL ERROR DETAILS ===");
+            console.log("Original error type:", error.constructor.name);
+            console.log("Original error message:", error.message);
+            console.log("Original error status:", error.status);
+            console.log("Original error code:", error.code);
+            console.log("Original error stack:", error.stack);
+            console.log("=== END ORIGINAL ERROR ===");
 
             if (error.status) {
                 throw error; // Re-throw known errors
             }
+            invitationLogger.error(`Database error in acceptInvite: ${error.message}`);
             // const status = error.status || 500;
             // const response = new Response({ status }, error.message);
             // return res.status(response.status).json(response.toJSON());
