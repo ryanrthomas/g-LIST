@@ -22,7 +22,7 @@
       alert(err?.response?.data?.message || "Failed to delete account.");
     }
   };
-import { disconnectSocket } from "../services/socketClient";
+import { connectSocket, disconnectSocket } from "../services/socketClient";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -39,6 +39,59 @@ function GroupList() {
   const [group, setGroup] = useState(null);
   const navigate = useNavigate();
   const { groupId } = useParams();
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) return;
+
+    console.log('Connecting socket for group:', groupId);
+    const socket = connectSocket(accessToken);
+    
+    // Join group room
+    socket.emit('join-group', groupId);
+    
+    // Function to refetch the list (reuse the exact same logic as the original useEffect)
+    const refetchList = () => {
+      console.log('Real-time update: Refetching group list');
+      const accessToken = localStorage.getItem("access_token");
+      axios.get(`${API_BASE_URL}/groups/${groupId}/list`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+        .then(res => {
+          const data = res.data.data;
+          if (data && Array.isArray(data.Items)) {
+            setItems(data.Items.map(item => ({
+              id: item.id,
+              name: item.item_name,
+              quantity: item.item_quantity,
+              price: item.item_price ? Number(item.item_price) : 0,
+              status: item.item_status,
+              purchased: item.item_status === "PURCHASED"
+            })));
+          } else {
+            setItems([]);
+          }
+        })
+        .catch(() => {
+          console.log('Failed to refetch list after real-time update');
+        });
+    };
+    
+    // Listen for real-time events
+    socket.on('list_item_added', refetchList);
+    socket.on('list_item_updated', refetchList);
+    socket.on('list_item_deleted', refetchList);
+    socket.on('list_cleared', refetchList);
+    
+    return () => {
+      console.log('Cleaning up socket for group:', groupId);
+      socket.off('list_item_added');
+      socket.off('list_item_updated');
+      socket.off('list_item_deleted');
+      socket.off('list_cleared');
+      socket.emit('leave-group', groupId);
+    };
+  }, [groupId]);
 
   useEffect(() => {
     const userId = localStorage.getItem("user_id");

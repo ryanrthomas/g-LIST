@@ -130,6 +130,7 @@ function Groups() {
       socket.off("invitation_accepted");
       socket.off("invitation_declined", refreshInvitations);
       socket.off("invitation_canceled", refreshInvitations);
+      socket.emit('leave-user', userId);
     };
   }, []);
 
