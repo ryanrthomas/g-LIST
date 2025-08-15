@@ -529,8 +529,8 @@ const invitationService = {
             
             return {
                 group: result.group,
-                group_name: result.group.group_name,
-                type: result.invitation.type
+                group_name: result.group?.group_name,
+                type: result.invitationData.type
             }
         
         }
