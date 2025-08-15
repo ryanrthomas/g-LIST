@@ -56,13 +56,36 @@ const invitationController = {
     },
 
     acceptInvite: async (req, res) => {
+        console.log("=== ACCEPT INVITE CONTROLLER START ===");
+        console.log("Params:", req.params);
+        console.log("User:", req.user?.id);
         try {
             const invitationID = parseInt(req.params.id);
+            console.log("Parsed invitation ID:", invitationID);
+
+
+            if (!invitationID || isNaN(invitationID)) {
+                console.log("Invalid invitation ID");
+                const response = new Response({ status: 400 }, "Invalid invitation ID");
+                return res.status(response.status).json(response.toJSON());
+            }
+            console.log("About to call invitationService.acceptInvite");
             const acceptedInvite = await invitationService.acceptInvite(req.user.id, invitationID);
+            console.log("Service returned:", JSON.stringify(acceptedInvite, null, 2));
+            console.log("Creating response...");
             const response = Response.ok(acceptedInvite, `Invitation accepted successfully. You are now a member of ${acceptedInvite.group_name}`);
+            console.log("Response created:", response);
+            console.log("About to send response...");
             return res.status(response.status).json(response.toJSON());
+            console.log("Response sent successfully");
         }
         catch (error) {
+            console.log("=== ACCEPT INVITE ERROR ===");
+            console.log("Error type:", error.constructor.name);
+            console.log("Error message:", error.message);
+            console.log("Error status:", error.status);
+            console.log("Error stack:", error.stack);
+            console.log("=== END ERROR ===");
             const status = error.status || 500;
             const response = new Response({ status }, error.message);
             return res.status(response.status).json(response.toJSON());
