@@ -20,7 +20,7 @@ const Home = () => {
 
 				{/* Main Hero Section */}
 				<section className="hero">
-					<h1>🛒 The G List</h1>
+					<h1>🛒 Test</h1>
 					<p className="hero-subtitle">
 						The smarter way to shop together — track, split, and share your grocery lists.
 					</p>
