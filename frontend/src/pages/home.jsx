@@ -7,19 +7,20 @@ const Home = () => {
 	return (
 		<>
 			<nav>
-				<div style={{ display: 'flex', width: '100%' }}>
-					<div style={{ marginLeft: 'auto' }} className="nav-links">
-						<a href="/signup" className="btn">Sign Up</a>
-						<a href="/login" className="btn">Login</a>
-					</div>
-				</div>
+  				<div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
+   					<h1 style={{ margin: 0 }}>The G List 🛒</h1>
+    				<div className="nav-links" style={{ display: 'flex', gap: '12px' }}>
+      					<a href="/signup" className="btn">Sign Up</a>
+      					<a href="/login" className="btn">Login</a>
+    				</div>
+  				</div>
 			</nav>
 
 			<div className="home-page">
 
 				{/* Main Hero Section */}
 				<section className="hero">
-					<h1>🛒 Welcome to Grocery Buddy</h1>
+					<h1>🛒 The G List</h1>
 					<p className="hero-subtitle">
 						The smarter way to shop together — track, split, and share your grocery lists.
 					</p>

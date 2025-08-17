@@ -5,7 +5,8 @@
   --mint-green: #9CDE9F;
   --pale-green: #D1F5BE;
   --button-hover: #6b5d45;
-  --font-main: 'Segoe UI', Arial, sans-serif;
+  --background: #9AAE78;
+  --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
 }
 body {
   background: var(--pale-green);

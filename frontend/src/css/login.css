@@ -13,7 +13,7 @@ form {
   --mint-green: #9CDE9F;
   --pale-green: #D1F5BE;
   --button-hover: #6b5d45;
-  --font-main: 'Segoe UI', Arial, sans-serif;
+  --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
 }
 body {
   background: var(--pale-green);
@@ -22,8 +22,7 @@ body {
   min-height: 100vh;
   margin: 0;
 }
-}
-}
+
 main {
   max-width: 400px;
   margin: 80px auto;
@@ -72,3 +71,4 @@ main {
   flex-direction: column;
   align-items: center;
 }
+
