@@ -28,7 +28,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "../css/grocery.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL_DEV;
 
 function GroupList() {
   const [items, setItems] = useState([]);
