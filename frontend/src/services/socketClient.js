@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // Use your API base URL for the socket connection
-const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL_DEV;
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '')  || import.meta.env.VITE_API_BASE_URL_DEV?.replace('/api/v1', '');
 
 let socket = null;
 
