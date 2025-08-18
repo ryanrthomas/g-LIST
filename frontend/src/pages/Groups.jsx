@@ -109,39 +109,30 @@ function Groups() {
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     const userId = localStorage.getItem("user_id");
-    if (!userId) return;
-
     if (!accessToken || !userId) return;
 
     // Connect the socket with authentication
     const socket = connectSocket(accessToken); 
-    // Join user room for real-time updates
-    socket.emit('join-user', userId);
 
     // Group events: refresh groups on any group change
     const refreshGroups = () => fetchGroups();
-    socket.on("group_item_added", refreshGroups);
-    socket.on("group_item_updated", refreshGroups);
-    socket.on("group_item_deleted", refreshGroups);
-    socket.on("group_list_cleared", refreshGroups);
+    socket.on("list:item_added", refreshGroups);     
+    socket.on("list:item_updated", refreshGroups);    
+    socket.on("list:item_deleted", refreshGroups);   
+    socket.on("list:cleared", refreshGroups);       
 
     // Invitation events: refresh invitations on any invitation change
     const refreshInvitations = () => fetchInvitations();
-    socket.on("invitation_received", refreshInvitations);
-    socket.on("invitation_accepted", () => { refreshInvitations(); refreshGroups(); });
-    socket.on("invitation_declined", refreshInvitations);
-    socket.on("invitation_canceled", refreshInvitations);
+    socket.on("invitation:received", refreshInvitations); 
+    socket.on("invitation:status_updated", () => { refreshInvitations(); refreshGroups(); }); 
 
     return () => {
-      socket.off("group_item_added", refreshGroups);
-      socket.off("group_item_updated", refreshGroups);
-      socket.off("group_item_deleted", refreshGroups);
-      socket.off("group_list_cleared", refreshGroups);
-      socket.off("invitation_received", refreshInvitations);
-      socket.off("invitation_accepted");
-      socket.off("invitation_declined", refreshInvitations);
-      socket.off("invitation_canceled", refreshInvitations);
-      socket.emit('leave-user', userId);
+      socket.off("list:item_added", refreshGroups);
+      socket.off("list:item_updated", refreshGroups);
+      socket.off("list:item_deleted", refreshGroups);
+      socket.off("list:cleared", refreshGroups);
+      socket.off("invitation:received", refreshInvitations);
+      socket.off("invitation:status_updated");
     };
   }, []);
 
