@@ -123,8 +123,8 @@ function Groups() {
 
     // Invitation events: refresh invitations on any invitation change
     const refreshInvitations = () => fetchInvitations();
-    socket.on("invitation:received", refreshInvitations); 
-    socket.on("invitation:status_updated", () => { refreshInvitations(); refreshGroups(); }); 
+    socket.on("invitation:received", () => { setTimeout(refreshInvitations, 100); });
+    socket.on("invitation:status_updated", () => { setTimeout(() => { refreshInvitations(); refreshGroups(); }, 150)}); 
 
     return () => {
       socket.off("list:item_added", refreshGroups);
