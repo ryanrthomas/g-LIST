@@ -17,19 +17,10 @@
   --button-hover: #6b5d45;
   --background: #9AAE78;
   --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
-  background: var(--deep-plum);
-  font-family: var(--font-main);
-  color: var(--mint-green);
+  /* color variables for UI elements only */
 }
 
 
-body {
-  min-height: 100vh;
-  margin: 0;
-  background: var(--deep-plum);
-  font-family: var(--font-main);
-  color: var(--deep-plum);
-}
 /* nav {
   background: none;
   border-radius: 0;
@@ -43,21 +34,37 @@ body {
   transition: color 0.2s;
 }
 
-body {
-  min-height: 100vh;
-  margin: 0;
-  background: var(--deep-plum);
-}
 
 
-h1{
+.hero h1{
   color: var(--mint-green);
   font-size: 55px;
   font-family: 'Kreon', sans-serif;
+  margin: 0;        /* remove default margins */
+  padding: 0;       /* optional: remove padding if any */
+  line-height: 1.05;
+}
+
+.hero-subtitle {
+  color: var(--mint-green);
+  font-size: 1.2rem;
+  margin-top: 16px;
+  text-align: center;
+  max-width: 600px; /* limit width for better readability */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-image {
+  width: 375px;
+  height: 300px;
+  object-fit: cover;   /* crop to fit the box without distortion */
+  display: block;
+  margin: 16px auto;
 }
 
 nav {
-  background: var(--background);
+  background: var(--olive-green);
   box-shadow: none;
   border: none;
   padding: 32px 0 0 0; /* increased top padding for spacing */
@@ -69,9 +76,24 @@ nav {
   left: 0;
   width: 100%;
   z-index: 10;
-  color: var(--warm-taupe);
+  color: var(--olive-green);
 }
 
+
+
+.home-page {
+  background: var(--deep-plum) !important; /* Force the color */
+  min-height: 100vh;
+  padding-top: 100px; /* Space for fixed nav */
+  position: relative;
+  z-index: 1; /* Ensure it stays behind fixed nav */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
 
 /* nav {
   background: none;
@@ -102,19 +124,7 @@ nav {
 .nav-links a:hover {
   color: var(--mint-green);
 }
-.hero {
-  max-width: 500px;
-  margin: 120px auto 40px auto;
-  padding: 32px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(155, 177, 124, 0.1);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+
 .cta-buttons {
   display: flex;
   gap: 16px;
@@ -135,4 +145,21 @@ nav {
 .btn:hover {
   background: var(--button-hover);
   color: var(--mint-green);
+}
+
+/* home.css */
+.feature-cards {
+  display: flex;
+  justify-content: center; /* centers the items horizontally */
+  gap: 20px; /* space between items */
+  margin: 20px 0; /* vertical spacing */
+}
+
+.feature-cards p {
+  margin: 0; /* removes default paragraph margins */
+  padding: 10px 15px; /* adds some padding */
+  background: rgba(156, 222, 159, 0.2); /* semi-transparent mint green */
+  border-radius: 8px; /* rounded corners */
+  color: var(--mint-green); /* mint green text */
+ 
 }

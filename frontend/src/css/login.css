@@ -1,10 +1,3 @@
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  align-items: center;
-}
 /* Login Page Styles */
 :root {
   --deep-plum: #4B3B40;
@@ -15,60 +8,61 @@ form {
   --button-hover: #6b5d45;
   --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
 }
-body {
-  background: var(--pale-green);
-  font-family: var(--font-main);
-  color: var(--deep-plum);
-  min-height: 100vh;
+
+/* Critical - This makes the background work */
+html, body, .login-container {
+  height: 100%;
   margin: 0;
+  padding: 0;
+}
+
+.login-container {
+  background: var(--deep-plum);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 main {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 32px;
   background: white;
+  width: 90%;
+  max-width: 400px;
+  padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(155, 177, 124, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+form {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 1.5rem;
 }
+
 input {
-  padding: 10px;
+  width: 100%;
+  padding: 12px;
   border: 1px solid var(--olive-green);
   border-radius: 6px;
-  font-size: 1rem;
-  background: #fff;
-  color: var(--deep-plum);
-  box-sizing: border-box;
-}
-input:focus {
-  outline: 2px solid var(--mint-green);
-}
-button {
-  background: var(--warm-taupe);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-button:hover {
-  background: var(--button-hover);
-  color: var(--mint-green);
-}
-main {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 32px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(155, 177, 124, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-family: var(--font-main);
 }
 
+button {
+  background: var(--warm-taupe);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: var(--button-hover);
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: -1rem;
+}
