@@ -49,6 +49,12 @@ export const initializeSocket = (server) => {
         // Join user to their personal room for invitation updates
         socket.join(`user:${socket.userId}`);
 
+        // Handle leaving user room
+        socket.on('leave-user', (userId) => {
+            socket.leave(`user:${userId}`);
+            console.log(`User ${socket.userId} left user room: user:${userId}`);
+        });
+
         // Handle joining group rooms for list updates
         socket.on('join-group', (groupId) => {
             socket.join(`group:${groupId}`);

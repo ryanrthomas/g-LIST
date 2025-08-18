@@ -1,4 +1,7 @@
   // Delete account handler
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL_DEV;
+
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
     const userId = localStorage.getItem("user_id");
@@ -60,7 +63,7 @@ function Groups() {
       return;
     }
     setLoadingGroups(true);
-    axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/groups`, {
+    axios.get(`${API_BASE_URL}/users/${userId}/groups`, {
       headers: { Authorization: `Bearer ${accessToken}` }
     })
       .then(res => {
@@ -84,10 +87,10 @@ function Groups() {
     }
     setLoadingInvitations(true);
     Promise.all([
-      axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/invitations/sent`, {
+      axios.get(`${API_BASE_URL}/users/${userId}/invitations/sent`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       }),
-      axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/invitations/received`, {
+      axios.get(`${API_BASE_URL}/users/${userId}/invitations/received`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       })
     ])
@@ -106,39 +109,30 @@ function Groups() {
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     const userId = localStorage.getItem("user_id");
-    if (!userId) return;
-
     if (!accessToken || !userId) return;
 
     // Connect the socket with authentication
     const socket = connectSocket(accessToken); 
-    // Join user room for real-time updates
-    socket.emit('join-user', userId);
 
     // Group events: refresh groups on any group change
     const refreshGroups = () => fetchGroups();
-    socket.on("group_item_added", refreshGroups);
-    socket.on("group_item_updated", refreshGroups);
-    socket.on("group_item_deleted", refreshGroups);
-    socket.on("group_list_cleared", refreshGroups);
+    socket.on("list:item_added", refreshGroups);     
+    socket.on("list:item_updated", refreshGroups);    
+    socket.on("list:item_deleted", refreshGroups);   
+    socket.on("list:cleared", refreshGroups);       
 
     // Invitation events: refresh invitations on any invitation change
     const refreshInvitations = () => fetchInvitations();
-    socket.on("invitation_received", refreshInvitations);
-    socket.on("invitation_accepted", () => { refreshInvitations(); refreshGroups(); });
-    socket.on("invitation_declined", refreshInvitations);
-    socket.on("invitation_canceled", refreshInvitations);
+    socket.on("invitation:received", refreshInvitations); 
+    socket.on("invitation:status_updated", () => { refreshInvitations(); refreshGroups(); }); 
 
     return () => {
-      socket.off("group_item_added", refreshGroups);
-      socket.off("group_item_updated", refreshGroups);
-      socket.off("group_item_deleted", refreshGroups);
-      socket.off("group_list_cleared", refreshGroups);
-      socket.off("invitation_received", refreshInvitations);
-      socket.off("invitation_accepted");
-      socket.off("invitation_declined", refreshInvitations);
-      socket.off("invitation_canceled", refreshInvitations);
-      socket.emit('leave-user', userId);
+      socket.off("list:item_added", refreshGroups);
+      socket.off("list:item_updated", refreshGroups);
+      socket.off("list:item_deleted", refreshGroups);
+      socket.off("list:cleared", refreshGroups);
+      socket.off("invitation:received", refreshInvitations);
+      socket.off("invitation:status_updated");
     };
   }, []);
 
@@ -171,7 +165,7 @@ function Groups() {
     }
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/invitations/start-group`,
+        `${API_BASE_URL}/invitations/start-group`,
         {
           to_user_code: createUserCode.trim(),
           group_name: groupName.trim(),
@@ -205,7 +199,7 @@ function Groups() {
     }
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/invitations/join-request`,
+        `${API_BASE_URL}/invitations/join-request`,
         {
           to_group_code: joinGroupCode.trim(),
           message: joinMessage.trim()
@@ -250,7 +244,7 @@ function Groups() {
     }
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_BASE_URL}/invitations/${respondData.id}/accept`,
+        `${API_BASE_URL}/invitations/${respondData.id}/accept`,
         {},
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -277,7 +271,7 @@ function Groups() {
       if (respondType === "sent") {
         // Cancel sent invitation (delete or cancel endpoint if exists, fallback to decline)
         await axios.put(
-          `${import.meta.env.VITE_API_BASE_URL}/invitations/${respondData.id}/decline`,
+          `${API_BASE_URL}/invitations/${respondData.id}/decline`,
           {},
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
@@ -285,7 +279,7 @@ function Groups() {
       } else {
         // Decline received invitation
         await axios.put(
-          `${import.meta.env.VITE_API_BASE_URL}/invitations/${respondData.id}/decline`,
+          `${API_BASE_URL}/invitations/${respondData.id}/decline`,
           {},
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );

@@ -28,7 +28,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "../css/grocery.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL_DEV;
 
 function GroupList() {
   const [items, setItems] = useState([]);
@@ -51,8 +51,7 @@ function GroupList() {
     
     // Wait for connection before joining rooms
     const setupSocket = () => {
-      console.log('Socket connected, joining rooms');
-      socket.emit('join-user', userId);
+      console.log('Socket connected, joining group room');
       socket.emit('join-group', groupId);
     };
 
@@ -104,7 +103,6 @@ function GroupList() {
       socket.off('list:item_deleted');
       socket.off('list:cleared');
       socket.emit('leave-group', groupId);
-      socket.emit('leave-user', userId);
     };
   }, [groupId]);
 
