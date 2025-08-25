@@ -4,6 +4,14 @@ import { useNavigate } from "react-router-dom";
 
 export default function LearnMore() {
   const navigate = useNavigate();
+  useEffect(() => {
+      localStorage.removeItem("user_code");
+      localStorage.removeItem("group_code");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("refresh_token");
+      window.dispatchEvent(new Event("user-auth-changed"));
+    }, []);
   return (
     <div className="learn-more">
       <div className="top-bar">

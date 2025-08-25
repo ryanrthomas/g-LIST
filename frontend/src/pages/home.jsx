@@ -5,6 +5,7 @@ import "../css/home.css"
 const Home = () => {
 	useEffect(() => {
 		localStorage.removeItem("user_code");
+		localStorage.removeItem("group_code");
 		localStorage.removeItem("access_token");
 		localStorage.removeItem("user_id");
 		localStorage.removeItem("refresh_token");
