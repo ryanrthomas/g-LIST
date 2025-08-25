@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/welcome.css"; // Make sure this is the only CSS import
+import NavBar from "../components/navbar";
 
 export default function Welcome() {
   const navigate = useNavigate();

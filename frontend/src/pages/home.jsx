@@ -2,6 +2,7 @@
 import React from 'react';
 import "../css/home.css"
 import GroceryMock from '../assets/grocerymock.jpg';
+import NavBar from '../components/navbar';
 
 
 const Home = () => {
@@ -40,6 +41,8 @@ const Home = () => {
 					<div className="feature-cards">
 						<p>Family Sharing</p> <p>Real-time Sharing</p> <p>Smart Links</p>
 					</div>
+
+					
 
 					{/* Buttons */}
 					<div className="cta-buttons">

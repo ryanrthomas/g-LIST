@@ -21,7 +21,9 @@ html, body, .welcome-root {
 
 /* Navigation styles */
 .top-nav {
+  /* Ensure the actual nav bar (top-nav) uses Olive Green */
   background: var(--olive-green);
+  color: #fff; /* white text for contrast on olive background */
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -32,19 +34,18 @@ html, body, .welcome-root {
   width: 100%;
 }
 
-.nav-links {
+/* If you want to be extra explicit for the links container */
+.top-nav .nav-links {
   display: flex;
   gap: 1.5rem;
 }
-
-.nav-links a {
-  color: var(--deep-plum);
+.top-nav .nav-links a {
+  color: #fff;           /* white links on olive bg for contrast */
   text-decoration: none;
   font-weight: bold;
   transition: color 0.2s;
 }
-
-.nav-links a:hover {
+.top-nav .nav-links a:hover {
   color: var(--mint-green);
 }
 

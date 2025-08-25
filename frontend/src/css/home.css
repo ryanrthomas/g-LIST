@@ -151,7 +151,7 @@ body {
 .feature-cards {
   display: flex;
   justify-content: center; /* centers the items horizontally */
-  gap: 20px; /* space between items */
+  gap: 16px; /* space between items */
   margin: 20px 0; /* vertical spacing */
 }
 
@@ -163,3 +163,4 @@ body {
   color: var(--mint-green); /* mint green text */
  
 }
+

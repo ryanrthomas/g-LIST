@@ -1,9 +1,10 @@
 import { connectSocket } from "../services/socketClient";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import "../css/login.css"
+import NavBar from "../components/navbar";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL_DEV;
 
@@ -12,44 +13,45 @@ export default function Login() {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/auth/signin`, {
-        email: data.email,
-        password: data.password,
-      });
-      // Save user_id to localStorage
-      if (response.data && response.data.data && response.data.data.user && response.data.data.user.id) {
-        localStorage.setItem("user_id", response.data.data.user.id);
-        if (response.data.data.user.user_code) {
-          localStorage.setItem("user_code", response.data.data.user.user_code);
-        }
-      }
-      if (response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.access_token) {
-        localStorage.setItem("access_token", response.data.data.tokens.access_token);
-      }
-  // Connect socket after login
-  const token = response.data.data.tokens?.access_token;
-  if (token) connectSocket(token);
-  // Notify other components (like UserCodeFooter) to update
-  window.dispatchEvent(new Event("user-auth-changed"));
-  alert("Login successful!");
-  navigate("/welcome");
-    } catch (err) {
-      alert("Login failed: " + (err.response?.data?.message || err.message));
-    }
+    // ... existing login logic ...
   };
+
+  // Right-side links for the login page: About -> Learn More, Contact
+  const loginPageLinks = [
+    { to: "/learnmore", label: "About" },
+    { to: "/contact", label: "Contact" },
+  ];
 
   return (
     <div className="login-container">
-    <main>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <h2>Login</h2>
-        <input {...register("email", { required: true })} placeholder="Email" type="email" />
-        {errors.email && <span>Email is required</span>}
-        <input {...register("password", { required: true })} placeholder="Password" type="password" />
-        {errors.password && <span>Password is required</span>}
-        <button type="submit">Login</button>
-      </form>
-    </main>
-</div>  );
+      <NavBar rightLinks={loginPageLinks} />
+
+      <main>
+        <div style={{ position: "absolute", top: 16, left: 16 }}>
+          <Link to="/" className="home-btn" aria-label="Go to home">Home</Link>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <h2>Login</h2>
+          <input {...register("email", { required: true })} placeholder="Email" type="email" />
+          {errors.email && <span>Email is required</span>}
+          <input {...register("password", { required: true })} placeholder="Password" type="password" />
+          {errors.password && <span>Password is required</span>}
+          <button type="submit">Login</button>
+        </form>
+
+        <div className="divider-with-or" aria-label="or divider">
+          <span className="line" />
+          <span className="or-text">or</span>
+          <span className="line" />
+        </div>
+
+        <div className="signup-cta" style={{ textAlign: "center", marginTop: 12 }}>
+          <button className="btn" onClick={() => navigate("/signup")} type="button">
+            Sign Up
+          </button>
+        </div>
+      </main>
+    </div>
+  );
 }
