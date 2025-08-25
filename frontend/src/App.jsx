@@ -4,8 +4,8 @@ import Signup from "./pages/signup";
 import Login from "./pages/login";
 import Home from "./pages/home";
 import GroceryList from "./pages/GroceryList";
+import Contact from "./pages/contact";
 import "./utils/axiosConfig";
-
 
 import LearnMore from "./pages/LearnMore";
 import Groups from "./pages/Groups";
@@ -25,6 +25,7 @@ function App() {
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:groupId" element={<GroupList />} />
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </Router>
       <UserCodeFooter />

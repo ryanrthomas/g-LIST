@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import "../css/home.css"
+import GroceryMock from '../assets/grocerymock.jpg';
+import NavBar from '../components/navbar';
 
 
 const Home = () => {
@@ -13,32 +15,40 @@ const Home = () => {
 	}, []);
 	return (
 		<>
-			<nav>
-  				<div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-   					<h1 style={{ margin: 0 }}>The G List 🛒</h1>
-    				<div className="nav-links" style={{ display: 'flex', gap: '12px' }}>
-      					<a href="/signup" className="btn">Sign Up</a>
-      					<a href="/login" className="btn">Login</a>
-    				</div>
-  				</div>
-			</nav>
+<nav>
+  <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <h1 style={{ margin: 0, color: '#d1f5be',fontSize:40 }}>The G List</h1>
+      <img src="/src/assets/glistphoto.png" alt="G List" style={{ height: 40, width: 'auto' }} />
+    </div>
+
+    <div className="nav-links" style={{ display: 'flex', gap: '12px' }}>
+	  <a href="/grocerylists" className="btn">My Lists</a>
+      <a href="/signup" className="btn">Sign Up</a>
+      <a href="/login" className="btn">Login</a>
+    </div>
+  </div>
+</nav>
 
 			<div className="home-page">
 
 				{/* Main Hero Section */}
 				<section className="hero">
-					<h1>🛒 The G List</h1>
-					<p className="hero-subtitle">
-						The smarter way to shop together — track, split, and share your grocery lists.
-					</p>
+					<h1> Share Your</h1>
+					<h1>Grocery Lists</h1>
+					<h1>With Everyone</h1>
 
+					<div className='hero-subtitle'>
+						<p>Create, share, and collaborate on grocery lists with family and friends. Never forget an item again and make shopping a breeze.</p>
+					</div>
+
+						<img src={GroceryMock} alt="Grocery mock" className="hero-image" />
 					{/* Card-style features like Learn More page */}
 					<div className="feature-cards">
-						<p>📝 Create and share grocery lists with your family or group</p>
-						<p>💰 Track prices & quantities to manage your budget</p>
-						<p>📍 Find nearby grocery stores with our map feature</p>
-						<p>👥 Join or create family groups for collaborative shopping</p>
+						<p>Family Sharing</p> <p>Real-time Sharing</p> <p>Smart Links</p>
 					</div>
+
+					
 
 					{/* Buttons */}
 					<div className="cta-buttons">
@@ -47,6 +57,7 @@ const Home = () => {
 					</div>
 				</section>
 			</div>
+			
 		</>
 	);
 };
