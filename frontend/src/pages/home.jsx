@@ -1,9 +1,15 @@
-
-import React from 'react';
+import React, { useEffect } from "react";
 import "../css/home.css"
 
 
 const Home = () => {
+	useEffect(() => {
+		localStorage.removeItem("user_code");
+		localStorage.removeItem("access_token");
+		localStorage.removeItem("user_id");
+		localStorage.removeItem("refresh_token");
+		window.dispatchEvent(new Event("user-auth-changed"));
+	}, []);
 	return (
 		<>
 			<nav>
