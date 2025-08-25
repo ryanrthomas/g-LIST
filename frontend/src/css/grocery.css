@@ -8,6 +8,7 @@
   --background: #9AAE78;
   --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
 }
+
 body {
   background: var(--pale-green);
   font-family: var(--font-main);
@@ -51,7 +52,7 @@ body {
 /* Make .list-container and .totals-container visually identical in width, background, border, and shadow */
 .list-container, .totals-container {
   max-width: 700px;
-  margin: 100px auto 40px auto;
+  margin: 120px auto 40px auto;
   background: white;
   border-radius: 16px;
   padding: 24px 32px;
@@ -65,6 +66,7 @@ h1 {
 }
 .item-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   margin-bottom: 24px;
 }
@@ -113,13 +115,13 @@ h1 {
 /* Modal Styles */
 .modal {
   display: none;
-  position: fixed;
+  position: fixed !important;
   z-index: 50;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden; /* Prevent page scroll */
   background-color: rgba(0,0,0,0.5);
 }
 .modal-content {
@@ -132,6 +134,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overscroll-behavior: contain; /* Prevents scroll chaining */
 }
 .modal-content h3 {
   margin: 0 0 12px 0;
@@ -155,4 +158,52 @@ h1 {
   text-decoration: line-through;
   color: #999;
   opacity: 0.7;
+}
+
+/* Fix checkbox column overflow */
+.item-table td:nth-child(1) {
+  width: 15%;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+  overflow: hidden; /* Prevent content from spilling */
+  white-space: nowrap; /* Keep content on one line */
+}
+
+/* Ensure item name column doesn't overlap */
+.item-table td:nth-child(2) {
+  width: 25%;
+  text-align: left;
+  padding-left: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ... if text is too long */
+  white-space: nowrap;
+}
+
+/* Make checkbox more visible and prevent overlap */
+.item-table td:nth-child(1) input[type="checkbox"] {
+  margin: 0;
+  display: block; /* Change to block to take full space */
+  margin: 0 auto; /* Center it */
+  width: 16px;
+  height: 16px;
+  position: relative;
+  z-index: 1; /* Ensure it's on top */
+}
+
+.item-table td:nth-child(2) {
+  width: 20%;
+  text-align: left;
+  padding-left: 16px;
+  white-space: normal; /* Allow text to wrap to multiple lines */
+  word-wrap: break-word; /* Break long words if needed */
+  overflow-wrap: break-word;
+}
+
+/* Make sure other columns remain centered */
+.item-table td:nth-child(3),
+.item-table td:nth-child(4),
+.item-table td:nth-child(5),
+.item-table td:nth-child(6) {
+  text-align: center;
 }

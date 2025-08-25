@@ -26,6 +26,7 @@ export default function Login() {
       }
       if (response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.access_token) {
         localStorage.setItem("access_token", response.data.data.tokens.access_token);
+        localStorage.setItem("refresh_token", response.data.data.tokens.refresh_token);
       }
   // Connect socket after login
   const token = response.data.data.tokens?.access_token;

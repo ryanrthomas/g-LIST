@@ -30,11 +30,7 @@ body {
   font-family: var(--font-main);
   color: var(--deep-plum);
 }
-/* nav {
-  background: none;
-  border-radius: 0;
-  padding: 48px 0 16px 0;
-} */
+
 .nav-links a {
   color: var(--deep-plum);
   text-decoration: none;
@@ -42,13 +38,6 @@ body {
   font-weight: bold;
   transition: color 0.2s;
 }
-
-body {
-  min-height: 100vh;
-  margin: 0;
-  background: var(--deep-plum);
-}
-
 
 h1{
   color: var(--mint-green);

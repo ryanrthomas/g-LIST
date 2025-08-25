@@ -4,6 +4,7 @@ import Signup from "./pages/signup";
 import Login from "./pages/login";
 import Home from "./pages/home";
 import GroceryList from "./pages/GroceryList";
+import "./utils/axiosConfig";
 
 
 import LearnMore from "./pages/LearnMore";

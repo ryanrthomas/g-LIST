@@ -37,6 +37,7 @@ function GroceryList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [currentModal, setCurrentModal] = useState(""); // Add this line after your other useState declarations
 
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
@@ -127,6 +128,76 @@ function GroceryList() {
       } catch (err) {
         alert("Failed to clear list: " + (err.response?.data?.message || err.message));
       }
+    }
+  };
+
+  const handleEditItem = (item) => {
+    setNewItem({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      status: item.status
+    });
+    setCurrentModal("editItem"); 
+  };
+
+  const handleEditSubmit = async () => {
+    if (!newItem.name.trim() || newItem.quantity < 1 || newItem.price < 0) {
+      alert("Please fill out valid Name, Quantity, and Price.");
+      return;
+    }
+    const accessToken = localStorage.getItem("access_token");
+    try {
+      await axios.put(
+        `${API_BASE_URL}/items/${newItem.id}`,
+        {
+          item_name: newItem.name,
+          item_quantity: newItem.quantity,
+          item_price: newItem.price,
+          item_status: newItem.status
+        },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      
+      // Update local state
+      setItems(items => items.map(item => 
+        item.id === newItem.id 
+          ? {
+              ...item,
+              name: newItem.name,
+              quantity: newItem.quantity,
+              price: newItem.price,
+              status: newItem.status
+            }
+          : item
+      ));
+      
+      setCurrentModal("");
+      alert("Item updated successfully!");
+    } catch (err) {
+      alert("Failed to update item: " + (err.response?.data?.message || err.message));
+    }
+  };
+  const handleDeleteItem = async (itemId) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      alert("Not logged in.");
+      return;
+    }
+    
+    try {
+      await axios.delete(`${API_BASE_URL}/items/${itemId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      
+      // Remove item from local state
+      setItems(items => items.filter(item => item.id !== itemId));
+      alert("Item deleted successfully!");
+    } catch (err) {
+      alert("Failed to delete item: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -231,6 +302,7 @@ function GroceryList() {
                 <th>Quantity</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -241,6 +313,42 @@ function GroceryList() {
                   <td>{item.quantity}</td>
                   <td>${item.price.toFixed(2)}</td>
                   <td>{item.status}</td>
+                  <td>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <button 
+                        className="action-btn edit-btn"
+                        onClick={() => handleEditItem(item)}
+                        style={{
+                          background: "var(--warm-taupe)",
+                          border: "none",
+                          cursor: item.purchased ? "not-allowed" : "pointer",
+                          fontSize: "0.9rem",
+                          color: "white",
+                          padding: "4px 8px",
+                          borderRadius: "4px"
+                        }}
+                        title="Edit item"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="action-btn delete-btn"
+                        onClick={() => handleDeleteItem(item.id)}
+                        style={{
+                          background: "var(--warm-taupe)",
+                          border: "none",
+                          cursor: item.purchased ? "not-allowed" : "pointer",
+                          fontSize: "0.9rem",
+                          color: "white",
+                          padding: "4px 8px",
+                          borderRadius: "4px"
+                        }}
+                        title="Delete item"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -271,6 +379,24 @@ function GroceryList() {
             <div className="modal-buttons">
               <button className="btn" onClick={handleModalSubmit}>Submit</button>
               <button className="btn clear" onClick={() => setShowModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {currentModal === "editItem" && (
+        <div className="modal" style={{ display: "block" }}>
+          <div className="modal-content">
+            <h3>Edit Item</h3>
+            <input type="text" name="name" value={newItem.name} onChange={handleModalChange} placeholder="Item Name" />
+            <input type="number" name="quantity" value={newItem.quantity} onChange={handleModalChange} placeholder="Quantity" min="1" />
+            <input type="number" name="price" value={newItem.price} onChange={handleModalChange} placeholder="Price ($)" min="0" step="0.01" />
+            <select name="status" value={newItem.status} onChange={handleModalChange}>
+              <option value="NEEDED">NEEDED</option>
+              <option value="OPTIONAL">OPTIONAL</option>
+            </select>
+            <div className="modal-buttons">
+              <button className="btn" onClick={handleEditSubmit}>Update</button>
+              <button className="btn clear" onClick={() => setCurrentModal("")}>Cancel</button>
             </div>
           </div>
         </div>
