@@ -109,39 +109,30 @@ function Groups() {
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     const userId = localStorage.getItem("user_id");
-    if (!userId) return;
-
     if (!accessToken || !userId) return;
 
     // Connect the socket with authentication
     const socket = connectSocket(accessToken); 
-    // Join user room for real-time updates
-    socket.emit('join-user', userId);
 
     // Group events: refresh groups on any group change
     const refreshGroups = () => fetchGroups();
-    socket.on("group_item_added", refreshGroups);
-    socket.on("group_item_updated", refreshGroups);
-    socket.on("group_item_deleted", refreshGroups);
-    socket.on("group_list_cleared", refreshGroups);
+    socket.on("list:item_added", refreshGroups);     
+    socket.on("list:item_updated", refreshGroups);    
+    socket.on("list:item_deleted", refreshGroups);   
+    socket.on("list:cleared", refreshGroups);       
 
     // Invitation events: refresh invitations on any invitation change
     const refreshInvitations = () => fetchInvitations();
-    socket.on("invitation_received", refreshInvitations);
-    socket.on("invitation_accepted", () => { refreshInvitations(); refreshGroups(); });
-    socket.on("invitation_declined", refreshInvitations);
-    socket.on("invitation_canceled", refreshInvitations);
+    socket.on("invitation:received", () => { setTimeout(refreshInvitations, 100); });
+    socket.on("invitation:status_updated", () => { setTimeout(() => { refreshInvitations(); refreshGroups(); }, 150)}); 
 
     return () => {
-      socket.off("group_item_added", refreshGroups);
-      socket.off("group_item_updated", refreshGroups);
-      socket.off("group_item_deleted", refreshGroups);
-      socket.off("group_list_cleared", refreshGroups);
-      socket.off("invitation_received", refreshInvitations);
-      socket.off("invitation_accepted");
-      socket.off("invitation_declined", refreshInvitations);
-      socket.off("invitation_canceled", refreshInvitations);
-      socket.emit('leave-user', userId);
+      socket.off("list:item_added", refreshGroups);
+      socket.off("list:item_updated", refreshGroups);
+      socket.off("list:item_deleted", refreshGroups);
+      socket.off("list:cleared", refreshGroups);
+      socket.off("invitation:received", refreshInvitations);
+      socket.off("invitation:status_updated");
     };
   }, []);
 
@@ -149,12 +140,7 @@ function Groups() {
   useEffect(() => {
     fetchGroups();
     fetchInvitations();
-    // eslint-disable-next-line
   }, []);
-
-  // No validation patterns
-  // const codePattern = ...
-  // const userPattern = ...
 
   // Modal open/close helpers
   const openModal = (name) => setModal(name);
@@ -315,7 +301,10 @@ function Groups() {
           <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
             <a href="#" style={{ marginRight: 16, color: 'red', fontWeight: 600 }} onClick={e => { e.preventDefault(); handleDeleteAccount(); }}>Delete Account</a>
             <a href="/welcome" onClick={e => { e.preventDefault(); navigate("/welcome"); }}>My List</a>
-            <a href="/groups" onClick={e => { e.preventDefault(); navigate("/groups"); }}>View Groups</a>
+            <a href="/groups" onClick={e => { 
+              e.preventDefault(); 
+              navigate("/groups");
+              localStorage.removeItem("group_code") }}>View Groups</a>
             <a href="#" className="signout" onClick={e => {
               e.preventDefault();
               localStorage.removeItem("user_id");
@@ -343,7 +332,10 @@ function Groups() {
                 className="group-card"
                 key={g.id || idx}
                 style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/groups/${g.id}`)}
+                onClick={() => { 
+                  navigate(`/groups/${g.id}`);
+                  localStorage.setItem("group_code", g.group_code);
+                }}
               >
                 <h2>{g.group_name || g.name}</h2>
                 <p style={{ fontSize: '0.95em', color: '#555' }}>Group Code: <b>{g.group_code}</b></p>

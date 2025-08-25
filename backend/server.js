@@ -15,18 +15,18 @@ const server = http.createServer(app);
 
 initializeSocket(server);
 
-// const corsOptions = {
-//     origin: [
-//         process.env.FRONTEND_URL_DEV,
-//         process.env.FRONTEND_URL,
-//         'https://g-list.vercel.app',      // Hardcoded backup
-//         'http://localhost:5173'           // Local dev backup
-//     ],// Replace with your frontend's origin
-//     credentials: true // Allow sending cookies/authentication headers
-// };
+const corsOptions = {
+    origin: [
+        process.env.FRONTEND_URL_DEV,
+        process.env.FRONTEND_URL,
+        'https://g-list.vercel.app',      // Hardcoded backup
+        'https://g-list-git-development-ryan-thomas-projects-495d967d.vercel.app',
+        'http://localhost:5173'           // Local dev backup
+    ],// Replace with your frontend's origin
+    credentials: true // Allow sending cookies/authentication headers
+};
 
-// app.use(cors(corsOptions));
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Add health check endpoint for monitoring

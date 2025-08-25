@@ -5,7 +5,7 @@ import Login from "./pages/login";
 import Home from "./pages/home";
 import GroceryList from "./pages/GroceryList";
 import Contact from "./pages/contact";
-
+import "./utils/axiosConfig";
 
 import LearnMore from "./pages/LearnMore";
 import Groups from "./pages/Groups";

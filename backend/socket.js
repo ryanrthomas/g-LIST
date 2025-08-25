@@ -22,9 +22,12 @@ export const initializeSocket = (server) => {
     // Authentication middleware for socket connections
     io.use(async (socket, next) => {
         try {
+            console.log('Socket connection attempt from:', socket.handshake.headers.origin);
+            console.log('Socket auth token present:', !!socket.handshake.auth.token);
             const token = socket.handshake.auth.token;
             
             if (!token) {
+                console.log('Socket auth failed: No token provided');
                 return next(new Error('Authentication error: No token provided'));
             }
 
@@ -32,13 +35,16 @@ export const initializeSocket = (server) => {
             const { data, error } = await supabasePublic.auth.getUser(token);
             
             if (error || !data.user) {
+                console.log('Socket auth failed: Invalid token', error?.message);
                 return next(new Error('Authentication error: Invalid token'));
             }
 
             socket.userId = data.user.id;
             socket.user = data.user;
+            console.log('Socket auth successful for user:', data.user.id);
             next();
         } catch (error) {
+            console.log('Socket auth error:', error.message);
             next(new Error('Authentication error'));
         }
     });
@@ -48,6 +54,12 @@ export const initializeSocket = (server) => {
 
         // Join user to their personal room for invitation updates
         socket.join(`user:${socket.userId}`);
+
+        // Handle leaving user room
+        socket.on('leave-user', (userId) => {
+            socket.leave(`user:${userId}`);
+            console.log(`User ${socket.userId} left user room: user:${userId}`);
+        });
 
         // Handle joining group rooms for list updates
         socket.on('join-group', (groupId) => {

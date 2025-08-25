@@ -187,13 +187,31 @@ const groupService = {
                     created_at: 'desc'
                 }
             });
+            // For JOIN_REQUEST type, group by from_user_id and take the most recent
+            const groupedRequests = new Map();
+            const groupInvites = [];
+
+            inviteHistory.forEach(inv => {
+                if (inv.type === 'JOIN_REQUEST') {
+                    const key = inv.from_user_id;
+                    if (!groupedRequests.has(key) || inv.created_at > groupedRequests.get(key).created_at) {
+                        groupedRequests.set(key, inv);
+                    }
+                } else {
+                    groupInvites.push(inv);
+                }
+            });
+
+            // Combine unique join requests with group invites
+            const uniqueInvitations = [...Array.from(groupedRequests.values()), ...groupInvites]
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             const formattedHistory = {
-                invitations: inviteHistory,
-                total_count: inviteHistory.length,
-                pending_count: inviteHistory.filter(inv => inv.status === 'PENDING').length,
-                accepted_count: inviteHistory.filter(inv => inv.status === 'ACCEPTED').length,
-                declined_count: inviteHistory.filter(inv => inv.status === 'DECLINED').length
+                invitations: uniqueInvitations,
+                total_count: uniqueInvitations.length,
+                pending_count: uniqueInvitations.filter(inv => inv.status === 'PENDING').length,
+                accepted_count: uniqueInvitations.filter(inv => inv.status === 'ACCEPTED').length,
+                declined_count: uniqueInvitations.filter(inv => inv.status === 'DECLINED').length
             };
 
             groupLogger.info(`Retrieved ${formattedHistory.total_count} invitations for group ${groupID}`);

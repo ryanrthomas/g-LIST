@@ -87,7 +87,9 @@ const invitationService = {
             throw err;
         }
 
-        const { to_user_code, from_group_id, message } = inviteData;
+        const { to_user_code, message } = inviteData;
+        const from_group_id = parseInt(inviteData.from_group_id);
+
 
         if(!to_user_code || !from_group_id) {
             invitationLogger.warn("sendInvite called without to_user_code and from_group_id");

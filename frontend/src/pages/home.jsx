@@ -1,11 +1,18 @@
-
-import React from 'react';
+import React, { useEffect } from "react";
 import "../css/home.css"
 import GroceryMock from '../assets/grocerymock.jpg';
 import NavBar from '../components/navbar';
 
 
 const Home = () => {
+	useEffect(() => {
+		localStorage.removeItem("user_code");
+		localStorage.removeItem("group_code");
+		localStorage.removeItem("access_token");
+		localStorage.removeItem("user_id");
+		localStorage.removeItem("refresh_token");
+		window.dispatchEvent(new Event("user-auth-changed"));
+	}, []);
 	return (
 		<>
 <nav>
@@ -36,7 +43,6 @@ const Home = () => {
 					</div>
 
 						<img src={GroceryMock} alt="Grocery mock" className="hero-image" />
-
 					{/* Card-style features like Learn More page */}
 					<div className="feature-cards">
 						<p>Family Sharing</p> <p>Real-time Sharing</p> <p>Smart Links</p>
@@ -46,8 +52,8 @@ const Home = () => {
 
 					{/* Buttons */}
 					<div className="cta-buttons">
-										  <a href="/signup" className="btn">Get Started</a>
-										  <a href="/learnmore" className="btn">Learn More</a>
+						<a href="/signup" className="btn">Get Started</a>
+						<a href="/learnmore" className="btn">Learn More</a>
 					</div>
 				</section>
 			</div>
