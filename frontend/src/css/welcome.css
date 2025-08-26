@@ -1,4 +1,15 @@
-/* Reset and base styles */
+:root {
+  --deep-plum: #4B3B40;
+  --warm-taupe: #82735C;
+  --olive-green: #9DB17C;
+  --mint-green: #9CDE9F;
+  --pale-green: #D1F5BE;
+  --button-hover: #6b5d45;
+  --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
+}
+
+
+
 html, body, .welcome-root {
   height: 100%;
   margin: 0;
@@ -6,9 +17,7 @@ html, body, .welcome-root {
   color: var(--deep-plum);
 }
 
-.welcome-root {
-  background-color: var(--deep-plum);
-}
+
 
 .welcome-page {
   min-height: 100vh;
@@ -17,6 +26,15 @@ html, body, .welcome-root {
   font-family: var(--font-main);
   display: flex;
   flex-direction: column;
+}
+
+
+/* more specific selector to avoid conflicts */
+.welcome-root .top-nav {
+  background: var(--olive-green);
+}
+.welcome-root .top-nav .nav-links a {
+  color: #fff;
 }
 
 /* Navigation styles */
