@@ -140,12 +140,7 @@ function Groups() {
   useEffect(() => {
     fetchGroups();
     fetchInvitations();
-    // eslint-disable-next-line
   }, []);
-
-  // No validation patterns
-  // const codePattern = ...
-  // const userPattern = ...
 
   // Modal open/close helpers
   const openModal = (name) => setModal(name);
@@ -296,17 +291,15 @@ function Groups() {
     // Place the top bar as the first child inside .groups-page, before nav, to match the working example
     return (
       <div className="groups-page">
-        <div className="groups-top-bar">
-          <button className="btn" onClick={() => openModal("create")}>➕ Create Group</button>
-          <button className="btn" onClick={() => openModal("join")}>🔗 Join Group</button>
-          <button className="btn" onClick={() => openModal("invitations")}>📩 Invitations</button>
-        </div>
         {/* Top Navigation Bar */}
         <nav className="top-nav">
           <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
             <a href="#" style={{ marginRight: 16, color: 'red', fontWeight: 600 }} onClick={e => { e.preventDefault(); handleDeleteAccount(); }}>Delete Account</a>
             <a href="/welcome" onClick={e => { e.preventDefault(); navigate("/welcome"); }}>My List</a>
-            <a href="/groups" onClick={e => { e.preventDefault(); navigate("/groups"); }}>View Groups</a>
+            <a href="/groups" onClick={e => { 
+              e.preventDefault(); 
+              navigate("/groups");
+              localStorage.removeItem("group_code") }}>View Groups</a>
             <a href="#" className="signout" onClick={e => {
               e.preventDefault();
               localStorage.removeItem("user_id");
@@ -316,6 +309,11 @@ function Groups() {
               window.dispatchEvent(new Event("user-auth-changed"));
               navigate("/");
             }}>Sign Out</a>
+          </div>
+          <div className="group-nav-buttons" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button className="btn" style={{ padding: "4px 8px", fontSize: "0.9rem" }} onClick={() => openModal("create")}>➕ Create Group</button>
+            <button className="btn" style={{ padding: "4px 8px", fontSize: "0.9rem" }} onClick={() => openModal("join")}>🔗 Join Group</button>
+            <button className="btn" style={{ padding: "4px 8px", fontSize: "0.9rem" }} onClick={() => openModal("invitations")}>📩 Invitations</button>
           </div>
         </nav>
 
@@ -334,7 +332,10 @@ function Groups() {
                 className="group-card"
                 key={g.id || idx}
                 style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/groups/${g.id}`)}
+                onClick={() => { 
+                  navigate(`/groups/${g.id}`);
+                  localStorage.setItem("group_code", g.group_code);
+                }}
               >
                 <h2>{g.group_name || g.name}</h2>
                 <p style={{ fontSize: '0.95em', color: '#555' }}>Group Code: <b>{g.group_code}</b></p>

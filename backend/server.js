@@ -20,6 +20,7 @@ const corsOptions = {
         process.env.FRONTEND_URL_DEV,
         process.env.FRONTEND_URL,
         'https://g-list.vercel.app',      // Hardcoded backup
+        'https://g-list-git-development-ryan-thomas-projects-495d967d.vercel.app',
         'http://localhost:5173'           // Local dev backup
     ],// Replace with your frontend's origin
     credentials: true // Allow sending cookies/authentication headers

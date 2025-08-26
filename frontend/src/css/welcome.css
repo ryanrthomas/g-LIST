@@ -1,0 +1,109 @@
+:root {
+  --deep-plum: #4B3B40;
+  --warm-taupe: #82735C;
+  --olive-green: #9DB17C;
+  --mint-green: #9CDE9F;
+  --pale-green: #D1F5BE;
+  --button-hover: #6b5d45;
+  --font-main: 'Kreon', 'Segoe UI', Arial, sans-serif;
+}
+
+
+
+html, body, .welcome-root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--deep-plum);
+}
+
+
+
+.welcome-page {
+  min-height: 100vh;
+  background-color: var(--deep-plum);
+  color: var(--deep-plum);
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* more specific selector to avoid conflicts */
+.welcome-root .top-nav {
+  background: var(--olive-green);
+}
+.welcome-root .top-nav .nav-links a {
+  color: #fff;
+}
+
+/* Navigation styles */
+.top-nav {
+  /* Ensure the actual nav bar (top-nav) uses Olive Green */
+  background: var(--olive-green);
+  color: #fff; /* white text for contrast on olive background */
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+/* If you want to be extra explicit for the links container */
+.top-nav .nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+.top-nav .nav-links a {
+  color: #fff;           /* white links on olive bg for contrast */
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+.top-nav .nav-links a:hover {
+  color: var(--mint-green);
+}
+
+.signout:hover {
+  color: #ff6b6b !important;
+}
+
+.learn-more-btn {
+  margin-left: auto;
+}
+
+.btn {
+  background: var(--mint-green);
+  color: var(--deep-plum) !important;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Content styles */
+.welcome-content {
+  flex: 1;
+  padding: 2rem;
+  margin-top: 80px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.welcome-content h1 {
+  color: var(--mint-green);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-content p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 600px;
+}
