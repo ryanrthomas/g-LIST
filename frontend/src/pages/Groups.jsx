@@ -291,11 +291,6 @@ function Groups() {
     // Place the top bar as the first child inside .groups-page, before nav, to match the working example
     return (
       <div className="groups-page">
-        <div className="groups-top-bar">
-          <button className="btn" onClick={() => openModal("create")}>➕ Create Group</button>
-          <button className="btn" onClick={() => openModal("join")}>🔗 Join Group</button>
-          <button className="btn" onClick={() => openModal("invitations")}>📩 Invitations</button>
-        </div>
         {/* Top Navigation Bar */}
         <nav className="top-nav">
           <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
@@ -314,6 +309,11 @@ function Groups() {
               window.dispatchEvent(new Event("user-auth-changed"));
               navigate("/");
             }}>Sign Out</a>
+          </div>
+          <div className="group-nav-buttons" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button className="btn" style={{ padding: "4px 8px", fontSize: "0.9rem" }} onClick={() => openModal("create")}>➕ Create Group</button>
+            <button className="btn" style={{ padding: "4px 8px", fontSize: "0.9rem" }} onClick={() => openModal("join")}>🔗 Join Group</button>
+            <button className="btn" style={{ padding: "4px 8px", fontSize: "0.9rem" }} onClick={() => openModal("invitations")}>📩 Invitations</button>
           </div>
         </nav>
 

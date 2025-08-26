@@ -516,36 +516,6 @@ function GroupList() {
 
   return (
     <>
-      <div className="groups-top-bar">
-        <button 
-          className="btn" 
-          style={{ padding: "4px 8px", fontSize: "0.9rem" }}
-          onClick={() => setCurrentModal("invite")} 
-        >
-          👥 Invite to Group
-        </button>
-        <button 
-          className="btn" 
-          style={{ padding: "4px 8px", fontSize: "0.9rem" }}
-          onClick={handleOpenGroupInvitations}
-        >
-          📩 Invitations
-        </button>
-        <button 
-          className="btn" 
-          style={{ padding: "4px 8px", fontSize: "0.9rem", backgroundColor: "#f39c12" }}
-          onClick={handleLeaveGroup}
-        >
-          🚪 Leave Group
-        </button>
-        <button 
-          className="btn clear" 
-          style={{ padding: "4px 8px", fontSize: "0.9rem" }}
-          onClick={handleDisbandGroup}
-        >
-          💥 Disband Group
-        </button>
-      </div>
       <nav className="top-nav">
         <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
           <a href="#" style={{ marginRight: 16, color: 'red', fontWeight: 600 }} onClick={e => { e.preventDefault(); handleDeleteAccount(); }}>Delete Account</a>
@@ -560,6 +530,36 @@ function GroupList() {
             window.dispatchEvent(new Event("user-auth-changed"));
             navigate("/");
           }}>Sign Out</a>
+        </div>
+        <div className="group-nav-buttons" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button 
+            className="btn" 
+            style={{ padding: "4px 8px", fontSize: "0.9rem" }}
+            onClick={() => setCurrentModal("invite")} 
+          >
+            👥 Invite to Group
+          </button>
+          <button 
+            className="btn" 
+            style={{ padding: "4px 8px", fontSize: "0.9rem" }}
+            onClick={handleOpenGroupInvitations}
+          >
+            📩 Invitations
+          </button>
+          <button 
+            className="btn" 
+            style={{ padding: "4px 8px", fontSize: "0.9rem", backgroundColor: "#f39c12" }}
+            onClick={handleLeaveGroup}
+          >
+            🚪 Leave Group
+          </button>
+          <button 
+            className="btn clear" 
+            style={{ padding: "4px 8px", fontSize: "0.9rem" }}
+            onClick={handleDisbandGroup}
+          >
+            💥 Disband Group
+          </button>
         </div>
       </nav>
       <main className="list-container">
