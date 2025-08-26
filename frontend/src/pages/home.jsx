@@ -23,7 +23,7 @@ const Home = () => {
     </div>
 
     <div className="nav-links" style={{ display: 'flex', gap: '12px' }}>
-	  <a href="/grocerylists" className="btn">My Lists</a>
+	  
       <a href="/signup" className="btn">Sign Up</a>
       <a href="/login" className="btn">Login</a>
     </div>

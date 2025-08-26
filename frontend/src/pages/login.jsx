@@ -41,6 +41,31 @@ export default function Login() {
     }
   };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // Right-side links for the login page: About -> Learn More, Contact
   const loginPageLinks = [
     { to: "/learnmore", label: "About" },
